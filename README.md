@@ -64,5 +64,10 @@ and enable the system-assigned managed identity instead of the three
 ## Deployment
 
 Every push to `main` triggers `.github/workflows/deploy.yml`, which builds on
-Node 22 and deploys to App Service `insurance-chat-moti` using the
-`AZURE_WEBAPP_PUBLISH_PROFILE` repository secret.
+Node 22 and deploys to App Service `insurance-chat-moti`.
+
+Basic-auth publishing (SCM and FTP) is disabled on the app, so publish-profile
+deployment does not work. The workflow authenticates with `azure/login` using
+the `AZURE_CREDENTIALS` repository secret — a JSON object holding `clientId`,
+`clientSecret`, `tenantId` and `subscriptionId` for a service principal with
+Contributor on `rg-insurance-bot`.
