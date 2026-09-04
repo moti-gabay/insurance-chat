@@ -32,6 +32,7 @@ previous `responseId` as `previous_response_id`.
 | Method | Path          | Description                                          |
 |--------|---------------|------------------------------------------------------|
 | POST   | `/api/chat`   | Body `{ question, previousResponseId? }` → `{ answer, sources, responseId }` |
+| GET    | `/api/me`     | `{ name }` of the signed-in user — `null` when running locally |
 | GET    | `/api/health` | Liveness check                                       |
 
 ## Local setup
@@ -60,6 +61,53 @@ project.
 In App Service, set `AGENT_URL` under **Configuration → Application settings**
 and enable the system-assigned managed identity instead of the three
 `AZURE_*` credential variables.
+
+## Authentication
+
+The deployed site is behind **App Service built-in authentication (Easy Auth)**
+with Microsoft Entra ID, single tenant. Every request is authenticated — there
+is no anonymous path, `/api/health` included.
+
+| Setting                      | Value                                     |
+|------------------------------|-------------------------------------------|
+| Identity provider            | Microsoft, current tenant (workforce)     |
+| Supported account types      | Single tenant                             |
+| Restrict access              | Require authentication                    |
+| Unauthenticated requests     | HTTP 302 redirect to the login page       |
+| Token store                  | Enabled                                   |
+
+Easy Auth runs as a separate container ahead of the Node process, so the app
+never sees an unauthenticated request and the check cannot be bypassed in
+application code. To exempt a path — an uptime probe, say, or a
+`healthCheckPath` — add it to `globalValidation.excludedPaths` in the
+`authsettingsV2` config; an Express route cannot do it.
+
+The signed-in user reaches the app as request headers, not as a token to parse:
+`X-MS-CLIENT-PRINCIPAL-NAME` holds the UPN, and `X-MS-CLIENT-PRINCIPAL` holds
+base64-encoded claims JSON. `/api/me` decodes the display name out of it for
+the page header. Both headers are absent locally, so the header stays hidden.
+
+Verifying with `curl` is misleading: Easy Auth returns **401 to non-browser
+clients** and only redirects requests that look like a browser. To see the 302,
+send a browser User-Agent:
+
+```bash
+curl -sS -o /dev/null -D - \
+  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120' \
+  https://insurance-chat-moti.azurewebsites.net/
+```
+
+The `Location` host is `login.windows.net` — the v1 hostname Entra still emits,
+equivalent to `login.microsoftonline.com`.
+
+> **Secret expiry.** The wizard created an Entra app registration and stored its
+> client secret in the `MICROSOFT_PROVIDER_AUTHENTICATION_SECRET` app setting.
+> That secret expires. When it does, sign-in breaks with `AADSTS7000215` —
+> rotate it under **Entra ID → App registrations → insurance-chat-moti →
+> Certificates & secrets**, then update the app setting.
+
+Changing the auth config on Linux App Service does not take effect until the
+site restarts — the auth container is injected at container start.
 
 ## Deployment
 

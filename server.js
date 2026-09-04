@@ -124,6 +124,33 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
+// Easy Auth injects the signed-in user's claims ahead of this process.
+// The headers are absent when running locally, so name comes back null.
+app.get("/api/me", (req, res) => {
+  const encoded = req.get("x-ms-client-principal");
+  let name = req.get("x-ms-client-principal-name") || null;
+
+  if (encoded) {
+    try {
+      const { claims } = JSON.parse(
+        Buffer.from(encoded, "base64").toString("utf8")
+      );
+      // Inbound claims are mapped to the long WS-Fed URIs unless
+      // clearInboundClaimsMapping is turned on, so accept both spellings.
+      const displayName = claims?.find(
+        (c) =>
+          c.typ === "name" ||
+          c.typ === "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+      )?.val;
+      if (displayName) name = displayName;
+    } catch {
+      // Malformed header — fall back to the UPN above.
+    }
+  }
+
+  res.json({ name });
+});
+
 app.get("/api/health", (_req, res) => res.json({ ok: true }));
 
 const port = process.env.PORT || 3000;
