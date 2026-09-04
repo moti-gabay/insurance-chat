@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>השוואת פוליסות ביטוח רכב</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #16202e;
+    --paper: #f7f8fa;
+    --card: #ffffff;
+    --line: #dde3ec;
+    --muted: #5c6b7f;
+    --accent: #1f6f5c;
+    --accent-soft: #eaf3f0;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Assistant, system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.65;
+  }
+
+  header {
+    border-bottom: 1px solid var(--line);
+    background: var(--card);
+    padding: 20px 24px;
+  }
+
+  .header-inner {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  header p {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px;
+    padding-bottom: 160px;
+  }
+
+  .intro {
+    color: var(--muted);
+    font-size: 15px;
+    margin-bottom: 24px;
+  }
+
+  .samples {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+
+  .sample {
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+    border-radius: 999px;
+    padding: 7px 14px;
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .sample:hover { border-color: var(--accent); }
+
+  .turn { margin-bottom: 28px; }
+
+  .question {
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .question::before {
+    content: "שאלה";
+    display: block;
+    font-weight: 400;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+
+  .answer {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px 20px;
+    white-space: pre-wrap;
+  }
+
+  .sources {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+
+  .sources-label {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .source {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 13px;
+    margin: 0 0 6px 6px;
+  }
+
+  .thinking { color: var(--muted); }
+
+  .error {
+    background: #fdf2f2;
+    border: 1px solid #f5c6c6;
+    border-radius: 10px;
+    padding: 16px 20px;
+    color: #8b2020;
+  }
+
+  footer {
+    position: fixed;
+    inset-block-end: 0;
+    inset-inline: 0;
+    background: var(--paper);
+    border-top: 1px solid var(--line);
+    padding: 16px 24px;
+  }
+
+  form {
+    max-width: 760px;
+    margin: 0 auto;
+    display: flex;
+    gap: 10px;
+  }
+
+  input[type="text"] {
+    flex: 1;
+    font: inherit;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--ink);
+  }
+
+  input[type="text"]:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: transparent;
+  }
+
+  button[type="submit"] {
+    font: inherit;
+    font-weight: 600;
+    padding: 12px 22px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+  }
+
+  button[type="submit"]:disabled {
+    background: var(--muted);
+    cursor: default;
+  }
+
+  .note {
+    max-width: 760px;
+    margin: 8px auto 0;
+    font-size: 12px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <h1>השוואת פוליסות ביטוח רכב</h1>
+    <p>שאלות על כיסויים, השתתפות עצמית וחריגים — התשובות נשענות על מסמכי הפוליסה בלבד</p>
+  </div>
+</header>
+
+<main>
+  <p class="intro">שאלו בשפה חופשית. אפשר להתחיל מאחת מאלה:</p>
+  <div class="samples">
+    <button class="sample">באילו מקרים מגיע רכב חלופי?</button>
+    <button class="sample">מה ההבדלים בכיסוי לשמשות?</button>
+    <button class="sample">מה נחשב פריצה לפי הפוליסה?</button>
+  </div>
+  <div id="stream"></div>
+</main>
+
+<footer>
+  <form id="form">
+    <input type="text" id="input" placeholder="מה תרצו לדעת?" autocomplete="off" required>
+    <button type="submit" id="send">שליחה</button>
+  </form>
+  <p class="note">תוכן שנוצר על ידי AI — יש לאמת מול הפוליסה המקורית.</p>
+</footer>
+
+<script>
+  const stream = document.getElementById("stream");
+  const form = document.getElementById("form");
+  const input = document.getElementById("input");
+  const send = document.getElementById("send");
+  let previousResponseId = null;
+
+  document.querySelectorAll(".sample").forEach(btn => {
+    btn.addEventListener("click", () => ask(btn.textContent));
+  });
+
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const q = input.value.trim();
+    if (q) ask(q);
+  });
+
+  async function ask(question) {
+    input.value = "";
+    send.disabled = true;
+
+    const turn = document.createElement("div");
+    turn.className = "turn";
+    turn.innerHTML = `<div class="question"></div><div class="answer thinking">מחפש במסמכים…</div>`;
+    turn.querySelector(".question").textContent = question;
+    stream.appendChild(turn);
+    turn.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    const answerEl = turn.querySelector(".answer");
+
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question, previousResponseId })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        answerEl.className = "error";
+        answerEl.textContent = data.error + (data.detail ? "\n\n" + data.detail : "");
+        return;
+      }
+
+      previousResponseId = data.responseId || previousResponseId;
+
+      answerEl.className = "answer";
+      answerEl.textContent = data.answer;
+
+      if (data.sources && data.sources.length) {
+        const box = document.createElement("div");
+        box.className = "sources";
+        const label = document.createElement("div");
+        label.className = "sources-label";
+        label.textContent = "מקורות";
+        box.appendChild(label);
+        data.sources.forEach(s => {
+          const tag = document.createElement("span");
+          tag.className = "source";
+          tag.textContent = s;
+          box.appendChild(tag);
+        });
+        answerEl.appendChild(box);
+      }
+    } catch (err) {
+      answerEl.className = "error";
+      answerEl.textContent = "לא הצלחנו להגיע לשרת. בדקו שהשרת פועל ונסו שוב.";
+    } finally {
+      send.disabled = false;
+      input.focus();
+    }
+  }
+</script>
+
+</body>
+</html>
